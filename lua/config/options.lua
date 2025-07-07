@@ -58,6 +58,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+-- paste the last yanked text not deleted text (you can still use Ctrl + Shift + V to pase)
+vim.keymap.set("n", "p", "\"0p")
+vim.keymap.set("n", "P", "\"0P")
+vim.keymap.set("v", "p", "\"0p")
+vim.keymap.set("v", "P", "\"0P")
+
 -- OPTIONS
 vim.opt.number = true
 vim.opt.cursorline = true
