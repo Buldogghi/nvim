@@ -65,6 +65,7 @@ vim.keymap.set("v", "p", "\"0p")
 vim.keymap.set("v", "P", "\"0P")
 
 -- OPTIONS
+
 vim.opt.number = true
 vim.opt.cursorline = true
 vim.opt.relativenumber = true
@@ -72,6 +73,9 @@ vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
 vim.opt.mouse = "a"
+
+-- Save undo history
+vim.opt.undofile = true
 
 -- Sync clipboard between OS and Neovim.
 vim.schedule(function()
