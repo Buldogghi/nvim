@@ -94,7 +94,8 @@ vim.opt.splitbelow = true
 vim.opt.list = true
 -- vim.opt.listchars = { trail = "·", nbsp = "␣" }
 -- vim.opt.listchars = { tab = "▏ ", trail = "·", nbsp = "␣" }
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '▎ ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = "split"
