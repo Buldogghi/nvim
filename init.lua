@@ -194,6 +194,7 @@ require("lazy").setup({
 				vim.cmd("colorscheme rose-pine")
 			end,
 		},
+		{ "nvim-tree/nvim-web-devicons", opts = {} },
 		{
 			"echasnovski/mini.nvim",
 			config = function() -- Configuration of mini.nvim modules
@@ -273,7 +274,7 @@ require("lazy").setup({
 			config = function()
 				require("mason").setup()
 				require("mason-tool-installer").setup({
-					ensure_installed = { "lua_ls", "clangd", "stylua", "clang-format" },
+					ensure_installed = { "lua_ls", "clangd", "stylua", "clang-format", "prettier", "prettierd" },
 				})
 			end,
 		},
@@ -368,7 +369,7 @@ require("lazy").setup({
 		{ "famiu/bufdelete.nvim" }, -- Manage buffers
 	},
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
-	checker = { enabled = true },
+	checker = { enabled = false },
 })
 
 -- local add = MiniDeps.add
