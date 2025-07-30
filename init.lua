@@ -231,6 +231,12 @@ require("lazy").setup({
 			duration_multiplier = 0.5,
 		} },
 		{
+			"NMAC427/guess-indent.nvim",
+			config = function()
+				require("guess-indent").setup()
+			end,
+		},
+		{
 			"shellRaining/hlchunk.nvim",
 			event = { "BufReadPre", "BufNewFile" },
 			config = function()
@@ -270,7 +276,7 @@ require("lazy").setup({
 			config = function()
 				require("mason").setup()
 				require("mason-tool-installer").setup({
-					ensure_installed = { "lua_ls", "clangd", "stylua", "clang-format", "prettier", "prettierd" },
+					ensure_installed = { "lua_ls", "clangd", "stylua", "prettier", "prettierd" },
 				})
 				require("mason-lspconfig").setup()
 			end,
@@ -279,14 +285,23 @@ require("lazy").setup({
 			"stevearc/conform.nvim",
 			config = function()
 				require("conform").setup({
-					format_on_save = {
-						lsp_format = "fallback",
-					},
+					format_on_save = function(bufnr) -- From kickstart.nvim
+						-- Disable "format_on_save lsp_fallback" for languages that don't
+						-- have a well standardized coding style. You can add additional
+						-- languages here or re-enable it for the disabled ones.
+						local disable_filetypes = { c = true, cpp = true }
+						if disable_filetypes[vim.bo[bufnr].filetype] then
+							return nil
+						else
+							return {
+								timeout_ms = 500,
+								lsp_format = "fallback",
+							}
+						end
+					end,
 					formatters_by_ft = { -- :help conform.format
 						lua = { "stylua" },
 						javascript = { "prettierd", "prettier", stop_after_first = true },
-						cpp = { "clang-format" },
-						c = { "clang-format" },
 					},
 				})
 			end,
