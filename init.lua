@@ -202,7 +202,12 @@ require("lazy").setup({
 				require("mini.git").setup()
 				require("mini.diff").setup()
 				require("mini.statusline").setup()
-				require("mini.pairs").setup()
+				require("mini.pairs").setup({
+					mappings = { -- input: |hello (" to |), output: "hello, previous_output: ""hello
+						['"'] = { neigh_pattern = "[^%a\\][^%a]" },
+						["'"] = { neigh_pattern = "[^%a\\][^%a]" },
+					},
+				})
 				require("mini.move").setup({
 					mappings = {
 						left = "<M-h>",
@@ -219,15 +224,6 @@ require("lazy").setup({
 					},
 				})
 				require("mini.comment").setup()
-				-- local animate = require("mini.animate")
-				-- animate.setup({
-				-- 	cursor = { enable = false },
-				-- 	scroll = {
-				-- 		-- To better know where i'm going with <C-d> and <C-u>
-				-- 		timing = animate.gen_timing.linear({ duration = 10, unit = "total" }),
-				-- 	},
-				-- 	resize = { enable = false },
-				-- })
 				require("mini.notify").setup()
 			end,
 		},
@@ -244,7 +240,7 @@ require("lazy").setup({
 						delay = 0,
 						duration = 0,
 						style = {
-							{ fg = "#FF00FF" },
+							{ fg = "#FFFFFF" },
 							{ fg = "#c21f30" },
 						},
 					},
@@ -276,6 +272,7 @@ require("lazy").setup({
 				require("mason-tool-installer").setup({
 					ensure_installed = { "lua_ls", "clangd", "stylua", "clang-format", "prettier", "prettierd" },
 				})
+				require("mason-lspconfig").setup()
 			end,
 		},
 		{ -- Configure format_on_save and formatters
@@ -297,11 +294,23 @@ require("lazy").setup({
 		{
 			"norcalli/nvim-colorizer.lua",
 			config = function()
-				require("colorizer").setup()
+				require("colorizer").setup({ "*" }, { mode = "foreground" })
 			end,
 		},
 		{ "nvim-treesitter/nvim-treesitter" },
-		{ "folke/which-key.nvim" },
+		{
+			"folke/which-key.nvim",
+			config = function()
+				require("which-key").add({
+					{ "<leader>b", desc = "[BUFFERS]" },
+					{ "<leader>s", desc = "[SPLITS]" },
+					{ "<leader>t", desc = "[TABS]" },
+					{ "<leader>l", desc = "[LSP]" },
+					{ "<leader>e", desc = "[NETRW]" },
+					{ "<leader>f", desc = "[TELESCOPE]" },
+				})
+			end,
+		},
 		{
 			"folke/lazydev.nvim",
 			ft = "lua", -- only load on lua files
@@ -311,6 +320,26 @@ require("lazy").setup({
 					-- Load luvit types when the `vim.uv` word is found
 					{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
 				},
+			},
+		},
+		{
+			"folke/flash.nvim",
+			event = "VeryLazy",
+			---@type Flash.Config
+			opts = {
+				modes = {
+					search = {
+						enabled = true,
+					},
+				},
+			},
+			-- stylua: ignore
+			keys = {
+				{ "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+				{ "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+				{ "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+				{ "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+				{ "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
 			},
 		},
 		{
@@ -358,6 +387,36 @@ require("lazy").setup({
 			opts_extend = { "sources.default" },
 		},
 		{
+			"nvim-telescope/telescope.nvim",
+			dependencies = {
+				{ "nvim-lua/plenary.nvim" },
+				{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			},
+			config = function()
+				require("telescope").setup({
+					defaults = require("telescope.themes").get_ivy({}),
+				})
+				vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Find Files" })
+				vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Find Buffers" })
+				vim.keymap.set("n", "<leader>fj", require("telescope.builtin").git_files, { desc = "Find Git Files" })
+				vim.keymap.set("n", "<leader>fk", require("telescope.builtin").git_status, { desc = "Find Git Status" })
+				vim.keymap.set("n", "<leader>fd", require("telescope.builtin").live_grep, { desc = "Find in Current" })
+				vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "Find Help" })
+				vim.keymap.set(
+					"n",
+					"<leader>fc",
+					require("telescope.builtin").git_commits,
+					{ desc = "Find Git Commits" }
+				)
+				vim.keymap.set(
+					"n",
+					"<leader><leader>",
+					require("telescope.builtin").buffers,
+					{ desc = "[FIND BUFFERS]" }
+				)
+			end,
+		},
+		{
 			"rachartier/tiny-inline-diagnostic.nvim",
 			event = "VeryLazy", -- Or `LspAttach`
 			priority = 1000, -- needs to be loaded in first
@@ -371,58 +430,3 @@ require("lazy").setup({
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
-
--- local add = MiniDeps.add
---
--- -- Install plugins
--- add({source = "rose-pine/neovim", name = "rose-pine"})
--- add({source = "neovim/nvim-lspconfig", name = "nvim-lspconfig"})
--- add({source = "mason-org/mason.nvim", name = "mason.nvim"})
--- add({source = "mason-org/mason-lspconfig.nvim", name = "mason-lspconfig.nvim"})
--- add({source = "nvim-treesitter/nvim-treesitter", name = "nvim-treesitter"})
--- add({source = "folke/which-key.nvim", name = "which-key.nvim"})
--- add({source = "hrsh7th/vim-vsnip", name = "vim-vsnip"})
--- add({source = "hrsh7th/vim-vsnip-integ", name = "vim-vsnip-integ"})
---
--- vim.cmd("colorscheme rose-pine")
---
--- -- Configure/enable plugins
--- require('rose-pine').setup()
--- require('mini.icons').setup()
--- require('hrsh7th/vim-vsnip').setup()
--- require('hrsh7th/vim-vsnip-integ').setup()
--- require('which-key').setup()
--- require('mini.git').setup()
--- require('mini.diff').setup()
--- require('mini.statusline').setup()
--- require('mini.pairs').setup()
--- require('mini.move').setup({
---	 mappings = {
---		 left = '<M-h>',
---		 right = '<M-l>',
---		 down = '<M-j>',
---		 up = '<M-k>',
---		 line_left = '<M-h>',
---		 line_right = '<M-l>',
---		 line_down = '<M-j>',
---		 line_up = '<M-k>',
---	 },
---	 options = {
---		 reindent_linewise = true,
---	 },
--- })
--- require('mini.comment').setup()
--- require('rafamadriz/friendly-snippets').setup()
--- require('saghen/blink.cmp').setup()
--- require('nvim-treesitter').setup()
--- require('mason').setup()
--- require('mason-lspconfig').setup()
--- local animate = require('mini.animate')
--- animate.setup({
---	 cursor = { enable = false },
---	 scroll = {
---		 -- To better know where i'm going with <C-d> and <C-u>
---		 timing = animate.gen_timing.linear({ duration = 10, unit = 'total' }),
---	 },
---	 resize = { enable = false },
--- })
