@@ -56,6 +56,15 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" 
 vim.keymap.set({ "n", "v" }, "p", '"0p')
 vim.keymap.set({ "n", "v" }, "P", '"0P')
 
+-- Don't deselect on copy or indent/deindent
+vim.keymap.set("v", "y", "ygv")
+vim.keymap.set("v", "<", "<gv")
+vim.keymap.set("v", ">", ">gv")
+
+-- n and N for newlines
+vim.keymap.set("n", "n", ":put =''<CR>", { silent = true })
+vim.keymap.set("n", "N", ":put! =''<CR>", { silent = true })
+
 -- ### SETTINGS ###
 
 vim.opt.number = true
@@ -68,7 +77,7 @@ vim.opt.softtabstop = 2
 vim.opt.smartindent = true -- Smart auto-indenting
 vim.opt.autoindent = true -- Copy indent from current line
 vim.opt.termguicolors = true -- Tell neovim my terminal supports colors
-mouse = "a"
+vim.opt.mouse = "a"
 
 -- Save undo history
 vim.opt.undofile = true
@@ -112,7 +121,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 -- Return to last edit position when opening files
 vim.api.nvim_create_autocmd("BufReadPost", {
-	group = augroup,
 	callback = function()
 		local mark = vim.api.nvim_buf_get_mark(0, '"')
 		local lcount = vim.api.nvim_buf_line_count(0)
@@ -125,7 +133,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 -- Create directories when saving files
 vim.api.nvim_create_autocmd("BufWritePre", {
-	group = augroup,
 	callback = function()
 		local dir = vim.fn.expand("<afile>:p:h")
 		if vim.fn.isdirectory(dir) == 0 then
@@ -320,9 +327,14 @@ require("lazy").setup({
 					{ "<leader>b", desc = "[BUFFERS]" },
 					{ "<leader>s", desc = "[SPLITS]" },
 					{ "<leader>t", desc = "[TABS]" },
-					{ "<leader>l", desc = "[LSP]" },
 					{ "<leader>e", desc = "[NETRW]" },
 					{ "<leader>f", desc = "[TELESCOPE]" },
+				})
+				-- Add the [LSP] label if LSP is actually there
+				vim.api.nvim_create_autocmd("LspAttach", {
+					callback = function()
+						require("which-key").add({ { "<leader>l", desc = "[LSP]" } })
+					end,
 				})
 			end,
 		},
