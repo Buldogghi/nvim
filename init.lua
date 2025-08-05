@@ -61,10 +61,6 @@ vim.keymap.set("v", "y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
--- n and N for newlines
-vim.keymap.set("n", "n", ":put =''<CR>", { silent = true })
-vim.keymap.set("n", "N", ":put! =''<CR>", { silent = true })
-
 -- ### SETTINGS ###
 
 vim.opt.number = true
