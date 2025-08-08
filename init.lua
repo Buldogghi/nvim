@@ -1,19 +1,47 @@
 -- Nvim single-file config
 
+-- ### SETTINGS ###
+
+vim.opt.number = true
+vim.opt.cursorline = true
+vim.opt.relativenumber = true
+vim.opt.tabstop = 2 -- Tab width
+vim.opt.shiftwidth = 2 -- Indent width
+vim.opt.softtabstop = 2
+vim.opt.smartindent = true -- Smart auto-indenting
+vim.opt.autoindent = true -- Copy indent from current line
+vim.opt.termguicolors = true -- Tell neovim my terminal supports colors
+vim.opt.mouse = "a"
+vim.opt.undofile = true -- Save undo history
+vim.opt.ignorecase = true
+vim.opt.smartcase = true -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+vim.opt.splitright = true -- Open splits to the right instead of left
+vim.opt.splitbelow = true -- Open splits below instead of above
+vim.opt.list = true -- Enable custom whitespace characters
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = "▎ ", trail = "·", nbsp = "␣" }
+vim.opt.scrolloff = 3 -- Number of lines above/below the cursor everytime
+vim.schedule(function() -- Sync clipboard between OS and Neovim.
+	vim.opt.clipboard = "unnamedplus"
+end)
+
+-- stylua: ignore start
 -- ### KEYBINDS ###
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- Basic keybinds
 vim.keymap.set("n", "<leader>e", vim.cmd.Ex)
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 -- Buffers
-vim.keymap.set("n", "<leader>bq", ":Bdelete<CR>", { desc = "Delete Buffer" })
+vim.keymap.set("n", "<leader>bq", ":Bdelete<CR>",  { desc = "Delete Buffer"  })
 vim.keymap.set("n", "<leader>bQ", ":Bwipeout<CR>", { desc = "Wipeout Buffer" })
 vim.keymap.set("n", "<leader>bd", function()
+	local currentBuf = vim.api.nvim_get_current_buf()
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-		if buf ~= vim.api.nvim_get_current_buf() then
+		if buf ~= currentBuf then
 			require("bufdelete").bufdelete(buf, true)
 		end
 	end
@@ -21,23 +49,22 @@ end, { desc = "Delete other buffers", noremap = true, silent = true })
 vim.keymap.set("n", "<leader>bn", ":enew<CR>", { desc = "New blank buffer" })
 
 -- Tabs (and Splits (and terminal))
-vim.keymap.set("n", "<leader>tn", ":tabnew<CR>", { desc = "New Tab" })
+vim.keymap.set("n", "<leader>tn", ":tabnew<CR>",   { desc = "New Tab"   })
 vim.keymap.set("n", "<leader>tc", ":tabclose<CR>", { desc = "Close Tab" })
 vim.keymap.set("n", "<leader>tt", function()
 	vim.cmd("tabnew")
 	vim.cmd("term")
 end, { desc = "Open terminal in new tab" })
-vim.keymap.set("n", "H", "gT", { desc = "Previus Tab" })
-vim.keymap.set("n", "L", "gt", { desc = "Next Tab" })
-vim.keymap.set("n", "<leader>sn", ":vsplit<CR>", { desc = "New Split (vertical)" })
-vim.keymap.set("n", "<leader>sh", ":split<CR>", { desc = "New Horizontal Split" })
-vim.keymap.set("n", "<leader>sv", ":vsplit<CR>", { desc = "New Vertical Split" })
-vim.keymap.set("n", "<leader>sc", ":close<CR>", { desc = "Close Split" })
-vim.keymap.set("n", "<leader>st", ":tab split<CR>", { desc = "Split to Tab" })
-vim.keymap.set("n", "<leader>so", ":only<CR>", { desc = "Only split" })
+vim.keymap.set("n", "H",          "gT",             { desc = "Previus Tab"          })
+vim.keymap.set("n", "L",          "gt",             { desc = "Next Tab"             })
+vim.keymap.set("n", "<leader>sn", ":vsplit<CR>",    { desc = "New Split (vertical)" })
+vim.keymap.set("n", "<leader>sh", ":split<CR>",     { desc = "New Horizontal Split" })
+vim.keymap.set("n", "<leader>sv", ":vsplit<CR>",    { desc = "New Vertical Split"   })
+vim.keymap.set("n", "<leader>sc", ":close<CR>",     { desc = "Close Split"          })
+vim.keymap.set("n", "<leader>st", ":tab split<CR>", { desc = "Split to Tab"         })
+vim.keymap.set("n", "<leader>so", ":only<CR>",      { desc = "Only split"           })
 
 -- Git DiffView
-
 -- vim.keymap.set("n", "<leader>do", ":DiffviewOpen<CR>", { desc = "Open Diffview" })
 -- vim.keymap.set("n", "<leader>dc", ":DiffviewClose<CR>", { desc = "Close Diffview" })
 -- vim.keymap.set("n", "<leader>dr", ":DiffviewRefresh<CR>", { desc = "Refresh Diffview" })
@@ -47,7 +74,7 @@ vim.keymap.set({ "n", "v" }, "j", "gj")
 vim.keymap.set({ "n", "v" }, "k", "gk")
 
 -- Moving through splits
-vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move focus to the left split" })
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move focus to the left split"  })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move focus to the right split" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move focus to the lower split" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" })
@@ -56,53 +83,11 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" 
 vim.keymap.set({ "n", "v" }, "p", '"0p')
 vim.keymap.set({ "n", "v" }, "P", '"0P')
 
--- Don't deselect on copy or indent/deindent
-vim.keymap.set("v", "y", "ygv")
+-- Don't deselect on copy (if Y is pressed) or indent/deindent
+vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
-
--- ### SETTINGS ###
-
-vim.opt.number = true
-vim.opt.cursorline = true
-vim.opt.relativenumber = true
-vim.opt.tabstop = 2 -- Tab width
-vim.opt.shiftwidth = 2 -- Indent width
-vim.opt.softtabstop = 2
--- vim.opt.expandtab = true -- Use spaces instead of tabs
-vim.opt.smartindent = true -- Smart auto-indenting
-vim.opt.autoindent = true -- Copy indent from current line
-vim.opt.termguicolors = true -- Tell neovim my terminal supports colors
-vim.opt.mouse = "a"
-
--- Save undo history
-vim.opt.undofile = true
-
--- Sync clipboard between OS and Neovim.
-vim.schedule(function()
-	vim.opt.clipboard = "unnamedplus"
-end)
-
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-
--- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-
--- Sets how neovim will display certain whitespace characters in the editor.
-vim.opt.list = true
--- vim.opt.listchars = { trail = "·", nbsp = "␣" }
--- vim.opt.listchars = { tab = "▏ ", trail = "·", nbsp = "␣" }
--- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-vim.opt.listchars = { tab = "▎ ", trail = "·", nbsp = "␣" }
-
--- Preview substitutions live, as you type!
--- vim.opt.inccommand = "split"
-
--- Number of lines above/below the cursor everytime
-vim.opt.scrolloff = 3
+-- stylua: ignore end
 
 -- ### AUTOCMDS ###
 
@@ -137,36 +122,16 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- Using conform.nvim
--- -- Format on save (from :help lsp)
--- vim.api.nvim_create_autocmd("LspAttach", {
--- 	group = vim.api.nvim_create_augroup("my.lsp", {}),
--- 	callback = function(args)
--- 		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
--- 		if
--- 			not client:supports_method("textDocument/willSaveWaitUntil")
--- 			and client:supports_method("textDocument/formatting")
--- 		then
--- 			vim.api.nvim_create_autocmd("BufWritePre", {
--- 				group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
--- 				buffer = args.buf,
--- 				callback = function()
--- 					vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
--- 				end,
--- 			})
--- 		end
--- 	end,
--- })
-
 -- Lsp keybinds (from :help lsp)
 vim.api.nvim_create_autocmd("LspAttach", {
+	-- stylua: ignore
 	callback = function()
-		vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename, { desc = "LSP: rename" })
-		vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, { desc = "LSP: code action" })
-		vim.keymap.set("n", "<leader>lf", vim.lsp.buf.references, { desc = "LSP: references" })
-		vim.keymap.set("n", "<leader>li", vim.lsp.buf.implementation, { desc = "LSP: implementation" })
-		vim.keymap.set("n", "<leader>ld", vim.lsp.buf.type_definition, { desc = "LSP: type definition" })
-		vim.keymap.set("n", "<leader>ls", vim.lsp.buf.document_symbol, { desc = "LSP: document symbol" })
+		vim.keymap.set({ "n"      }, "<leader>lr", vim.lsp.buf.rename,           { desc = "LSP: rename"          })
+		vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action,      { desc = "LSP: code action"     })
+		vim.keymap.set({ "n"      }, "<leader>lf", vim.lsp.buf.references,       { desc = "LSP: references"      })
+		vim.keymap.set({ "n"      }, "<leader>li", vim.lsp.buf.implementation,   { desc = "LSP: implementation"  })
+		vim.keymap.set({ "n"      }, "<leader>ld", vim.lsp.buf.type_definition,  { desc = "LSP: type definition" })
+		vim.keymap.set({ "n"      }, "<leader>ls", vim.lsp.buf.document_symbol,  { desc = "LSP: document symbol" })
 	end,
 })
 
@@ -236,7 +201,7 @@ require("lazy").setup({
 		{
 			"NMAC427/guess-indent.nvim",
 			config = function()
-				require("guess-indent").setup()
+				require("guess-indent").setup({})
 			end,
 		},
 		{
@@ -319,11 +284,12 @@ require("lazy").setup({
 		{
 			"folke/which-key.nvim",
 			config = function()
+				-- stylua: ignore
 				require("which-key").add({
-					{ "<leader>b", desc = "[BUFFERS]" },
-					{ "<leader>s", desc = "[SPLITS]" },
-					{ "<leader>t", desc = "[TABS]" },
-					{ "<leader>e", desc = "[NETRW]" },
+					{ "<leader>b", desc = "[BUFFERS]"   },
+					{ "<leader>s", desc = "[SPLITS]"    },
+					{ "<leader>t", desc = "[TABS]"      },
+					{ "<leader>e", desc = "[NETRW]"     },
 					{ "<leader>f", desc = "[TELESCOPE]" },
 				})
 				-- Add the [LSP] label if LSP is actually there
@@ -350,19 +316,29 @@ require("lazy").setup({
 			event = "VeryLazy",
 			---@type Flash.Config
 			opts = {
+				label = {
+					style = "inline",
+					rainbow = {
+						enabled = true,
+						shade = 2,
+					},
+				},
 				modes = {
 					search = {
 						enabled = true,
+					},
+					char = {
+						enabled = false,
 					},
 				},
 			},
 			-- stylua: ignore
 			keys = {
-				{ "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-				{ "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-				{ "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-				{ "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-				{ "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+				{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash"               },
+				{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter"    },
+				{ "r",     mode = {           "o" }, function() require("flash").remote() end,            desc = "Remote Flash"        },
+				{ "R",     mode = {      "x", "o" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search"   },
+				{ "<c-s>", mode =        "c",        function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
 			},
 		},
 		{
@@ -419,24 +395,16 @@ require("lazy").setup({
 				require("telescope").setup({
 					defaults = require("telescope.themes").get_ivy({}),
 				})
-				vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Find Files" })
-				vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Find Buffers" })
-				vim.keymap.set("n", "<leader>fj", require("telescope.builtin").git_files, { desc = "Find Git Files" })
-				vim.keymap.set("n", "<leader>fk", require("telescope.builtin").git_status, { desc = "Find Git Status" })
-				vim.keymap.set("n", "<leader>fd", require("telescope.builtin").live_grep, { desc = "Find in Current" })
-				vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "Find Help" })
-				vim.keymap.set(
-					"n",
-					"<leader>fc",
-					require("telescope.builtin").git_commits,
-					{ desc = "Find Git Commits" }
-				)
-				vim.keymap.set(
-					"n",
-					"<leader><leader>",
-					require("telescope.builtin").buffers,
-					{ desc = "[FIND BUFFERS]" }
-				)
+				-- stylua: ignore start
+				vim.keymap.set("n", "<leader>ff",       require("telescope.builtin").find_files,  { desc = "Find Files"       })
+				vim.keymap.set("n", "<leader>fb",       require("telescope.builtin").buffers,     { desc = "Find Buffers"     })
+				vim.keymap.set("n", "<leader>fj",       require("telescope.builtin").git_files,   { desc = "Find Git Files"   })
+				vim.keymap.set("n", "<leader>fk",       require("telescope.builtin").git_status,  { desc = "Find Git Status"  })
+				vim.keymap.set("n", "<leader>fd",       require("telescope.builtin").live_grep,   { desc = "Find in Current"  })
+				vim.keymap.set("n", "<leader>fh",       require("telescope.builtin").help_tags,   { desc = "Find Help"        })
+				vim.keymap.set("n", "<leader>fc",       require("telescope.builtin").git_commits, { desc = "Find Git Commits" })
+				vim.keymap.set("n", "<leader><leader>", require("telescope.builtin").buffers,     { desc = "[FIND BUFFERS]"   })
+				-- stylua: ignore end
 			end,
 		},
 		{
