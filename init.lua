@@ -65,9 +65,9 @@ vim.keymap.set("n", "<leader>st", ":tab split<CR>", { desc = "Split to Tab"     
 vim.keymap.set("n", "<leader>so", ":only<CR>",      { desc = "Only split"           })
 
 -- Git DiffView
--- vim.keymap.set("n", "<leader>do", ":DiffviewOpen<CR>", { desc = "Open Diffview" })
--- vim.keymap.set("n", "<leader>dc", ":DiffviewClose<CR>", { desc = "Close Diffview" })
--- vim.keymap.set("n", "<leader>dr", ":DiffviewRefresh<CR>", { desc = "Refresh Diffview" })
+vim.keymap.set("n", "<leader>do", ":DiffviewOpen<CR>", { desc = "Open Diffview" })
+vim.keymap.set("n", "<leader>dc", ":DiffviewClose<CR>", { desc = "Close Diffview" })
+vim.keymap.set("n", "<leader>dr", ":DiffviewRefresh<CR>", { desc = "Refresh Diffview" })
 
 -- jk in wrapped text
 vim.keymap.set({ "n", "v" }, "j", "gj")
@@ -199,6 +199,12 @@ require("lazy").setup({
 			duration_multiplier = 0.5,
 		} },
 		{
+			"sindrets/diffview.nvim",
+			config = function()
+				require("diffview").setup()
+			end,
+		},
+		{
 			"NMAC427/guess-indent.nvim",
 			config = function()
 				require("guess-indent").setup({})
@@ -291,6 +297,7 @@ require("lazy").setup({
 					{ "<leader>t", desc = "[TABS]"      },
 					{ "<leader>e", desc = "[NETRW]"     },
 					{ "<leader>f", desc = "[TELESCOPE]" },
+					{ "<leader>d", desc = "[DIFFVIEW]" },
 				})
 				-- Add the [LSP] label if LSP is actually there
 				vim.api.nvim_create_autocmd("LspAttach", {
