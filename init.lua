@@ -80,8 +80,8 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move focus to the lower split" 
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" })
 
 -- paste the last yanked text not deleted text (you can still use Ctrl + Shift + V to paste)
-vim.keymap.set({ "n", "v" }, "p", '"0p')
-vim.keymap.set({ "n", "v" }, "P", '"0P')
+-- vim.keymap.set({ "n", "v" }, "p", '"0p')
+-- vim.keymap.set({ "n", "v" }, "P", '"0P')
 
 -- Don't deselect on copy (if Y is pressed) or indent/deindent
 vim.keymap.set("v", "Y", "ygv")
