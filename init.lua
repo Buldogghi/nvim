@@ -1,6 +1,6 @@
 -- Nvim single-file config
 
--- ### SETTINGS ###
+-- {{{ Settings
 
 vim.opt.number = true
 vim.opt.cursorline = true
@@ -24,9 +24,13 @@ vim.opt.scrolloff = 3 -- Number of lines above/below the cursor everytime
 vim.schedule(function() -- Sync clipboard between OS and Neovim.
 	vim.opt.clipboard = "unnamedplus"
 end)
+vim.opt.foldmethod = "marker" -- Enables folding
+
+--- }}}
+
+-- {{{ Keybinds
 
 -- stylua: ignore start
--- ### KEYBINDS ###
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
@@ -89,7 +93,9 @@ vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 -- stylua: ignore end
 
--- ### AUTOCMDS ###
+-- }}}
+
+-- {{{ Autocmds
 
 -- Kickstart.nvim highlight when copying text
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -152,7 +158,10 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- ### PLUGINS ###
+-- }}}
+
+-- {{{ Plugins
+
 require("lazy").setup({
 	spec = { -- Plugins:
 		{
@@ -332,7 +341,7 @@ require("lazy").setup({
 				},
 				modes = {
 					search = {
-						enabled = true,
+						enabled = false,
 					},
 					char = {
 						enabled = false,
@@ -428,3 +437,5 @@ require("lazy").setup({
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
+
+-- }}}
