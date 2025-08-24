@@ -228,8 +228,9 @@ require("lazy").setup({
 						enable = true,
 						delay = 0,
 						duration = 0,
+						use_treesitter = true,
 						style = {
-							{ fg = "#FFFFFF" },
+							{ fg = "#ffffff" },
 							{ fg = "#c21f30" },
 						},
 					},
@@ -290,9 +291,14 @@ require("lazy").setup({
 			end,
 		},
 		{
-			"norcalli/nvim-colorizer.lua",
+			"brenoprata10/nvim-highlight-colors",
 			config = function()
-				require("colorizer").setup({ "*" }, { mode = "foreground" })
+				require("nvim-highlight-colors").setup({
+					render = "virtual",
+					virtual_symbol_prefix = "[",
+					virtual_symbol_suffix = "]",
+					virtual_symbol_position = "eow", -- Stands for end of word
+				})
 			end,
 		},
 		{ "nvim-treesitter/nvim-treesitter" },
@@ -437,5 +443,3 @@ require("lazy").setup({
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
-
--- }}}
