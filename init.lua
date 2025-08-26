@@ -91,6 +91,13 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" 
 vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
+
+-- Navigate through folds
+vim.keymap.set("n","<leader>jj","zA",{desc = "Toggle fold under cursor"})
+vim.keymap.set("n","<leader>jf","zO",{desc = "Open folds under cursor"})
+vim.keymap.set("n","<leader>jd","zC",{desc = "Close folds under cursor"})
+vim.keymap.set("n","<leader>js","zR",{desc = "Open all folds"})
+vim.keymap.set("n","<leader>ja","zM",{desc = "Close all folds"})
 -- stylua: ignore end
 
 -- }}}
@@ -312,7 +319,8 @@ require("lazy").setup({
 					{ "<leader>t", desc = "[TABS]"      },
 					{ "<leader>e", desc = "[NETRW]"     },
 					{ "<leader>f", desc = "[TELESCOPE]" },
-					{ "<leader>d", desc = "[DIFFVIEW]" },
+					{ "<leader>d", desc = "[DIFFVIEW]"  },
+					{ "<leader>j", desc = "[FOLDS]"     },
 				})
 				-- Add the [LSP] label if LSP is actually there
 				vim.api.nvim_create_autocmd("LspAttach", {
@@ -439,7 +447,18 @@ require("lazy").setup({
 			end,
 		},
 		{ "famiu/bufdelete.nvim" }, -- Manage buffers
+		{
+			"kevinhwang91/nvim-ufo",
+			dependencies = {
+				"kevinhwang91/promise-async",
+			},
+			config = function()
+				require("ufo").setup()
+			end,
+		},
 	},
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
+
+-- }}}
