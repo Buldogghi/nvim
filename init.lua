@@ -42,7 +42,7 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 -- Buffers
 vim.keymap.set("n", "<leader>bq", ":Bdelete<CR>",  { desc = "Delete Buffer"  })
 vim.keymap.set("n", "<leader>bQ", ":Bwipeout<CR>", { desc = "Wipeout Buffer" })
-vim.keymap.set("n", "<leader>bd", function()
+vim.keymap.set("n", "<leader>bo", function()
 	local currentBuf = vim.api.nvim_get_current_buf()
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 		if buf ~= currentBuf then
@@ -92,12 +92,6 @@ vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
--- Navigate through folds
-vim.keymap.set("n","<leader>jj","zA",{desc = "Toggle fold under cursor"})
-vim.keymap.set("n","<leader>jf","zO",{desc = "Open folds under cursor"})
-vim.keymap.set("n","<leader>jd","zC",{desc = "Close folds under cursor"})
-vim.keymap.set("n","<leader>js","zR",{desc = "Open all folds"})
-vim.keymap.set("n","<leader>ja","zM",{desc = "Close all folds"})
 -- stylua: ignore end
 
 -- }}}
@@ -137,14 +131,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 -- Lsp keybinds (from :help lsp)
 vim.api.nvim_create_autocmd("LspAttach", {
+
 	-- stylua: ignore
 	callback = function()
-		vim.keymap.set({ "n"      }, "<leader>lr", vim.lsp.buf.rename,           { desc = "LSP: rename"          })
-		vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action,      { desc = "LSP: code action"     })
-		vim.keymap.set({ "n"      }, "<leader>lf", vim.lsp.buf.references,       { desc = "LSP: references"      })
-		vim.keymap.set({ "n"      }, "<leader>li", vim.lsp.buf.implementation,   { desc = "LSP: implementation"  })
-		vim.keymap.set({ "n"      }, "<leader>ld", vim.lsp.buf.type_definition,  { desc = "LSP: type definition" })
-		vim.keymap.set({ "n"      }, "<leader>ls", vim.lsp.buf.document_symbol,  { desc = "LSP: document symbol" })
+		require("which-key").add({ { "<leader>l", desc = "[LSP]" } })
+
+		vim.keymap.set({ "n"      }, "<leader>lr", vim.lsp.buf.rename,           { desc = "Rename"           })
+		vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action,      { desc = "Code action"      })
+		vim.keymap.set({ "n"      }, "<leader>lf", vim.lsp.buf.references,       { desc = "References"       })
+		vim.keymap.set({ "n"      }, "<leader>li", vim.lsp.buf.implementation,   { desc = "Implementation"   })
+		vim.keymap.set({ "n"      }, "<leader>lt", vim.lsp.buf.type_definition,  { desc = "Type definition"  })
+		vim.keymap.set({ "n"      }, "<leader>ld", vim.lsp.buf.definition,       { desc = "Definition"       })
+		vim.keymap.set({ "n"      }, "<leader>lD", vim.lsp.buf.declaration,      { desc = "Declaration"      })
+		vim.keymap.set({ "n"      }, "<leader>ls", vim.lsp.buf.document_symbol,  { desc = "Document symbol"  })
 	end,
 })
 
@@ -313,20 +312,19 @@ require("lazy").setup({
 			"folke/which-key.nvim",
 			config = function()
 				-- stylua: ignore
-				require("which-key").add({
-					{ "<leader>b", desc = "[BUFFERS]"   },
-					{ "<leader>s", desc = "[SPLITS]"    },
-					{ "<leader>t", desc = "[TABS]"      },
-					{ "<leader>e", desc = "[NETRW]"     },
-					{ "<leader>f", desc = "[TELESCOPE]" },
-					{ "<leader>d", desc = "[DIFFVIEW]"  },
-					{ "<leader>j", desc = "[FOLDS]"     },
+				require("which-key").setup({
+					icons = {
+						group = "",
+						mappings = false,
+					}
 				})
-				-- Add the [LSP] label if LSP is actually there
-				vim.api.nvim_create_autocmd("LspAttach", {
-					callback = function()
-						require("which-key").add({ { "<leader>l", desc = "[LSP]" } })
-					end,
+				require("which-key").add({
+					{ "<leader>b", desc = "[BUFFERS]" },
+					{ "<leader>s", desc = "[SPLITS]" },
+					{ "<leader>t", desc = "[TABS]" },
+					{ "<leader>e", desc = "[NETRW]" },
+					{ "<leader>f", desc = "[TELESCOPE]" },
+					{ "<leader>d", desc = "[DIFFVIEW]" },
 				})
 			end,
 		},
@@ -453,6 +451,23 @@ require("lazy").setup({
 				"kevinhwang91/promise-async",
 			},
 			config = function()
+				vim.o.foldcolumn = "1"
+				vim.o.foldlevel = 99
+				vim.o.foldlevelstart = 99
+				vim.o.foldenable = true
+				vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+				vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+				local capabilities = vim.lsp.protocol.make_client_capabilities()
+				capabilities.textDocument.foldingRange = {
+					dynamicRegistration = false,
+					lineFoldingOnly = true,
+				}
+				local language_servers = vim.lsp.get_clients()
+				for _, ls in ipairs(language_servers) do
+					require("lspconfig")[ls].setup({
+						capabilities = capabilities,
+					})
+				end
 				require("ufo").setup()
 			end,
 		},
