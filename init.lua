@@ -35,7 +35,6 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Basic keybinds
-vim.keymap.set("n", "<leader>e", vim.cmd.Ex)
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
@@ -164,6 +163,23 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "oil",
+	callback = function()
+		require("which-key").add({ "<leader>o", "[OIL]" })
+		-- Only to set a description
+		vim.keymap.set("n", "<leader>o?", "", { desc = "Show help [g?]" })
+		vim.keymap.set("n", "<leader>ol", "", { desc = "Open dir on another split [gs]" })
+		vim.keymap.set("n", "<leader>op", "", { desc = "Toggle preview [<C-p>]" })
+		vim.keymap.set("n", "<leader>o-", "", { desc = "Go to parent [-]" })
+		vim.keymap.set("n", "<leader>o_", "", { desc = "Go to cwd [_]" })
+		vim.keymap.set("n", "<leader>od", "", { desc = "Get cwd [~]" })
+		vim.keymap.set("n", "<leader>os", "", { desc = "Change sort [gs]" })
+		vim.keymap.set("n", "<leader>oh", "", { desc = "Toggle hidden file [g.]" })
+		vim.keymap.set("n", "<leader>o\\", "", { desc = "Toggle trash view [g\\]" })
+	end,
+})
+
 -- }}}
 
 -- {{{ Plugins
@@ -177,7 +193,6 @@ require("lazy").setup({
 				vim.cmd("colorscheme rose-pine")
 			end,
 		},
-		{ "nvim-tree/nvim-web-devicons", opts = {} },
 		{
 			"echasnovski/mini.nvim",
 			config = function() -- Configuration of mini.nvim modules
@@ -322,7 +337,6 @@ require("lazy").setup({
 					{ "<leader>b", desc = "[BUFFERS]" },
 					{ "<leader>s", desc = "[SPLITS]" },
 					{ "<leader>t", desc = "[TABS]" },
-					{ "<leader>e", desc = "[NETRW]" },
 					{ "<leader>f", desc = "[TELESCOPE]" },
 					{ "<leader>d", desc = "[DIFFVIEW]" },
 				})
@@ -470,6 +484,60 @@ require("lazy").setup({
 				end
 				require("ufo").setup()
 			end,
+		},
+		{
+			"stevearc/oil.nvim",
+			---@module 'oil'
+			---@type oil.SetupOpts
+			dependencies = {
+				"folke/which-key.nvim",
+			},
+			config = function()
+				require("oil").setup({
+					columns = {},
+					keymaps = {
+						["g?"] = { "actions.show_help", mode = "n" },
+						["<leader>o?"] = { "actions.show_help", mode = "n" },
+						["<CR>"] = "actions.select",
+						["<C-s>"] = { "actions.select", opts = { vertical = true } },
+						["<leader>ol"] = { "actions.select", opts = { vertical = true } },
+						["<C-p>"] = "actions.preview",
+						["<leader>op"] = "actions.preview",
+						["<C-c>"] = { "actions.close", mode = "n" },
+						["<Esc>"] = { "actions.refresh", mode = "n" },
+						["-"] = { "actions.parent", mode = "n" },
+						["<leader>o-"] = { "actions.parent", mode = "n" },
+						["_"] = { "actions.open_cwd", mode = "n" },
+						["<leader>o_"] = { "actions.open_cwd", mode = "n" },
+						["`"] = { "actions.cd", mode = "n" },
+						["~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
+						["<leader>od"] = { "actions.cd", mode = "n" },
+						["gs"] = { "actions.change_sort", mode = "n" },
+						["<leader>os"] = { "actions.change_sort", mode = "n" },
+						["gx"] = "actions.open_external",
+						["g."] = { "actions.toggle_hidden", mode = "n" },
+						["<leader>o."] = { "actions.toggle_hidden", mode = "n" },
+						["g\\"] = { "actions.toggle_trash", mode = "n" },
+						["<leader>o\\"] = { "actions.toggle_trash", mode = "n" },
+					},
+					view_options = {
+						show_hidden = true,
+					},
+				})
+				require("which-key").add({ "<leader>e", desc = "[TOGGLE OIL]" })
+				vim.keymap.set("n", "<leader>e", function()
+					if vim.bo.filetype == "oil" then
+						require("oil").close()
+					else
+						require("oil").open()
+					end
+				end, { desc = "Toggle oil" })
+			end,
+			lazy = false,
+		},
+		{
+			"benomahony/oil-git.nvim",
+			dependencies = { "stevearc/oil.nvim" },
 		},
 	},
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
