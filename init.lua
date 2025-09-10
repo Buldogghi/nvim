@@ -210,17 +210,20 @@ require("lazy").setup({
 						-- before the cursor needs to be an escape character (%c = "\t\n\r")
 						-- or a space and the next/previous character needs to also be that.
 
+
 						["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 						["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." }, -- RIGHT: any character
 						["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
+						["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 
 						[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
 						["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
 						["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+						[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 
-						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c ][%c ]", register = { cr = true } },
-						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c ][%c ]", register = { cr = true } },
-						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c ][%c ]", register = { cr = true } },
+						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`][%c )%]}>'`]", register = { cr = true } },
+						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`][%c )%]}>\"`]", register = { cr = true } },
+						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"][%c )%]}>'\"]", register = { cr = true } },
 					},
 				})
 				require("mini.move").setup({
