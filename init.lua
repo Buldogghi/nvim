@@ -201,9 +201,26 @@ require("lazy").setup({
 				require("mini.diff").setup()
 				require("mini.statusline").setup()
 				require("mini.pairs").setup({
-					mappings = { -- input: |hello (" to |), output: "hello, previous_output: ""hello
-						['"'] = { neigh_pattern = "[^%a\\][^%a]" },
-						["'"] = { neigh_pattern = "[^%a\\][^%a]" },
+					-- stylua: ignore
+					mappings = {
+						-- For more info about lua patterns:
+						-- https://gitspartv.github.io/lua-patterns/
+
+						-- [%c ][%c ] Means that for the quotes to be doubled the character
+						-- before the cursor needs to be an escape character (%c = "\t\n\r")
+						-- or a space and the next/previous character needs to also be that.
+
+						["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
+						["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." }, -- RIGHT: any character
+						["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
+
+						[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
+						["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
+						["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+
+						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c ][%c ]", register = { cr = true } },
+						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c ][%c ]", register = { cr = true } },
+						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c ][%c ]", register = { cr = true } },
 					},
 				})
 				require("mini.move").setup({
