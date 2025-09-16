@@ -121,6 +121,9 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 -- Create directories when saving files
 vim.api.nvim_create_autocmd("BufWritePre", {
 	callback = function()
+		if vim.bo.filetype == "oil" then
+			return
+		end
 		local dir = vim.fn.expand("<afile>:p:h")
 		if vim.fn.isdirectory(dir) == 0 then
 			vim.fn.mkdir(dir, "p")
@@ -214,16 +217,14 @@ require("lazy").setup({
 						["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 						["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." }, -- RIGHT: any character
 						["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
-						["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 
 						[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
 						["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
 						["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
-						[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." }, -- LEFT: not backslash
 
-						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`][%c )%]}>'`]", register = { cr = true } },
-						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`][%c )%]}>\"`]", register = { cr = true } },
-						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"][%c )%]}>'\"]", register = { cr = true } },
+						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`=][%c )%]}>'`]", register = { cr = true } },
+						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`=][%c )%]}>\"`]", register = { cr = true } },
+						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"=][%c )%]}>'\"]", register = { cr = true } },
 					},
 				})
 				require("mini.move").setup({
