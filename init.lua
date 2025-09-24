@@ -26,6 +26,9 @@ vim.schedule(function() -- Sync clipboard between OS and Neovim.
 end)
 vim.opt.foldmethod = "marker" -- Enables folding
 
+-- Aliases
+vim.api.nvim_command("cabbrev Q q!")
+
 --- }}}
 
 -- {{{ Keybinds
