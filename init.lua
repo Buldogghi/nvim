@@ -1,4 +1,5 @@
 -- Nvim single-file config
+-- By Buldogghi (buldogghi@proton.me)
 
 -- {{{ Settings
 
@@ -27,7 +28,11 @@ end)
 vim.opt.foldmethod = "marker" -- Enables folding
 
 -- Aliases
-vim.api.nvim_command("cabbrev Q q!")
+vim.api.nvim_command("cabbrev Q qa!")
+
+vim.diagnostic.config({
+	signs = false, -- turn off diagnostic signs
+})
 
 --- }}}
 
@@ -93,6 +98,24 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" 
 vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
+
+-- Emacs keymaps because why not
+vim.keymap.set({"n", "v", "i"}, "<C-f>", "<Right>")
+vim.keymap.set({"n", "v", "i"}, "<C-b>", "<Left>")
+vim.keymap.set({"n", "v", "i"}, "<C-n>", "<Down>")
+vim.keymap.set({"n", "v", "i"}, "<C-p>", "<Up>")
+-- And vim in insert/visual
+vim.keymap.set({"v", "i"}, "<C-l>", "<Right>")
+vim.keymap.set({"v", "i"}, "<C-h>", "<Left>")
+vim.keymap.set({"v", "i"}, "<C-j>", "<Down>")
+vim.keymap.set({"v", "i"}, "<C-k>", "<Up>")
+
+-- K for useful info
+vim.keymap.set("n", "K", vim.diagnostic.open_float)
+vim.keymap.set("n", "L", vim.lsp.buf.hover)
+
+-- Shift enter for folds
+vim.keymap.set("n", "<S-CR>", "zA", { silent = true })
 
 -- stylua: ignore end
 
@@ -225,9 +248,12 @@ require("lazy").setup({
 						["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
 						["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
 
-						['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`=][%c )%]}>'`]", register = { cr = true } },
-						["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`=][%c )%]}>\"`]", register = { cr = true } },
-						['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"=][%c )%]}>'\"]", register = { cr = true } },
+						-- ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`=][%c )%]}>'`]", register = { cr = true } },
+						-- ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`=][%c )%]}>\"`]", register = { cr = true } },
+						-- ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"=][%c )%]}>'\"]", register = { cr = true } },
+						['"'] = false,
+						["'"] = false,
+						['`'] = false
 					},
 				})
 				require("mini.move").setup({
@@ -249,9 +275,19 @@ require("lazy").setup({
 				require("mini.notify").setup()
 			end,
 		},
-		{ "karb94/neoscroll.nvim", opts = {
-			duration_multiplier = 0.5,
-		} },
+		{
+			"karb94/neoscroll.nvim",
+			opts = {
+				duration_multiplier = 0.3,
+				mappings = {
+					"<C-d>",
+					"<C-u>",
+					"zz",
+					"zt",
+					"zb",
+				},
+			},
+		},
 		{
 			"sindrets/diffview.nvim",
 			config = function()
@@ -377,36 +413,36 @@ require("lazy").setup({
 				},
 			},
 		},
-		{
-			"folke/flash.nvim",
-			event = "VeryLazy",
-			---@type Flash.Config
-			opts = {
-				label = {
-					style = "inline",
-					rainbow = {
-						enabled = true,
-						shade = 2,
-					},
-				},
-				modes = {
-					search = {
-						enabled = false,
-					},
-					char = {
-						enabled = false,
-					},
-				},
-			},
-			-- stylua: ignore
-			keys = {
-				{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash"               },
-				{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter"    },
-				{ "r",     mode = {           "o" }, function() require("flash").remote() end,            desc = "Remote Flash"        },
-				{ "R",     mode = {      "x", "o" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search"   },
-				{ "<c-s>", mode =        "c",        function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
-			},
-		},
+		-- {
+		-- 	"folke/flash.nvim",
+		-- 	event = "VeryLazy",
+		-- 	---@type Flash.Config
+		-- 	opts = {
+		-- 		label = {
+		-- 			style = "inline",
+		-- 			rainbow = {
+		-- 				enabled = true,
+		-- 				shade = 2,
+		-- 			},
+		-- 		},
+		-- 		modes = {
+		-- 			search = {
+		-- 				enabled = false,
+		-- 			},
+		-- 			char = {
+		-- 				enabled = false,
+		-- 			},
+		-- 		},
+		-- 	},
+		-- 	-- stylua: ignore
+		-- 	keys = {
+		-- 		{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash"               },
+		-- 		{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter"    },
+		-- 		{ "r",     mode = {           "o" }, function() require("flash").remote() end,            desc = "Remote Flash"        },
+		-- 		{ "R",     mode = {      "x", "o" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search"   },
+		-- 		{ "<c-s>", mode =        "c",        function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+		-- 	},
+		-- },
 		{
 			"saghen/blink.cmp",
 			dependencies = { "rafamadriz/friendly-snippets" },
@@ -414,19 +450,8 @@ require("lazy").setup({
 			---@module 'blink.cmp'
 			---@type blink.cmp.Config
 			opts = {
-				-- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
-				-- 'super-tab' for mappings similar to vscode (tab to accept)
-				-- 'enter' for enter to accept
-				-- 'none' for no mappings
-				--
-				-- All presets have the following mappings:
-				-- C-space: Open menu or open docs if already open
-				-- C-n/C-p or Up/Down: Select next/previous item
-				-- C-e: Hide menu
-				-- C-k: Toggle signature help (if signature.enabled = true)
-				--
 				-- See :h blink-cmp-config-keymap for defining your own keymap
-				keymap = { preset = "super-tab" },
+				keymap = { preset = "default" },
 				appearance = {
 					-- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
 					-- Adjusts spacing to ensure icons are aligned
@@ -448,6 +473,9 @@ require("lazy").setup({
 					},
 				},
 				fuzzy = { implementation = "prefer_rust_with_warning" },
+				sources = {
+					default = { "lsp", "path", "buffer" },
+				},
 			},
 			opts_extend = { "sources.default" },
 		},
