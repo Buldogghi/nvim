@@ -111,8 +111,8 @@ vim.keymap.set({"v", "i"}, "<C-j>", "<Down>")
 vim.keymap.set({"v", "i"}, "<C-k>", "<Up>")
 
 -- K for useful info
-vim.keymap.set("n", "K", vim.diagnostic.open_float)
-vim.keymap.set("n", "L", vim.lsp.buf.hover)
+vim.keymap.set("n", ";", vim.diagnostic.open_float)
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
 -- Shift enter for folds
 vim.keymap.set("n", "<S-CR>", "zA", { silent = true })
