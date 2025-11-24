@@ -164,14 +164,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function()
 		require("which-key").add({ { "<leader>l", desc = "[LSP]" } })
 
-		vim.keymap.set({ "n"      }, "<leader>lr", vim.lsp.buf.rename,           { desc = "Rename"           })
-		vim.keymap.set({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action,      { desc = "Code action"      })
-		vim.keymap.set({ "n"      }, "<leader>lf", vim.lsp.buf.references,       { desc = "References"       })
-		vim.keymap.set({ "n"      }, "<leader>li", vim.lsp.buf.implementation,   { desc = "Implementation"   })
-		vim.keymap.set({ "n"      }, "<leader>lt", vim.lsp.buf.type_definition,  { desc = "Type definition"  })
-		vim.keymap.set({ "n"      }, "<leader>ld", vim.lsp.buf.definition,       { desc = "Definition"       })
-		vim.keymap.set({ "n"      }, "<leader>lD", vim.lsp.buf.declaration,      { desc = "Declaration"      })
-		vim.keymap.set({ "n"      }, "<leader>ls", vim.lsp.buf.document_symbol,  { desc = "Document symbol"  })
+		vim.keymap.set("n", "<leader>k",  vim.lsp.buf.hover,            { desc = "Lsp Hover"        })
+		vim.keymap.set("n", "<leader>K",  vim.lsp.buf.signature_help,   { desc = "Signature help"   })
+		vim.keymap.set("n", "<leader>lr", vim.lsp.buf.rename,           { desc = "Rename"           })
+		vim.keymap.set("n", "<leader>la", vim.lsp.buf.code_action,      { desc = "Code action"      })
+		vim.keymap.set("n", "<leader>lf", vim.lsp.buf.references,       { desc = "References"       })
+		vim.keymap.set("n", "<leader>li", vim.lsp.buf.implementation,   { desc = "Implementation"   })
+		vim.keymap.set("n", "<leader>lt", vim.lsp.buf.type_definition,  { desc = "Type definition"  })
+		vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition,       { desc = "Definition"       })
+		vim.keymap.set("n", "<leader>lD", vim.lsp.buf.declaration,      { desc = "Declaration"      })
+		vim.keymap.set("n", "<leader>ls", vim.lsp.buf.document_symbol,  { desc = "Document symbol"  })
+		vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format,           { desc = "Format"           })
 	end,
 })
 
@@ -214,7 +217,8 @@ vim.api.nvim_create_autocmd("FileType", {
 -- {{{ Plugins
 
 require("lazy").setup({
-	spec = { -- Plugins:
+	spec = {
+		-- START OF PLUGINS
 		{
 			"rose-pine/neovim",
 			name = "rose-pine",
@@ -248,12 +252,17 @@ require("lazy").setup({
 						["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
 						["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
 
+
+						-- To open in a nice way the brackets when pressing enter
+						[">"] = { action = "open", pair = "><", neigh_pattern = "$^$^", register = { cr = true } }, -- For html
+						['"'] = { action = "open", pair = '""', neigh_pattern = "$^$^", register = { cr = true } }, -- Neigh pattern that never matches
+						["'"] = { action = "open", pair = "''", neigh_pattern = "$^$^", register = { cr = true } },
+						['`'] = { action = "open", pair = "``", neigh_pattern = "$^$^", register = { cr = true } },
+
+						-- For actual autopairs (i don't like them)
 						-- ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = "[%c (%[{<'`=][%c )%]}>'`]", register = { cr = true } },
 						-- ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[%c (%[{<\"`=][%c )%]}>\"`]", register = { cr = true } },
 						-- ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = "[%c (%[{<'\"=][%c )%]}>'\"]", register = { cr = true } },
-						['"'] = false,
-						["'"] = false,
-						['`'] = false
 					},
 				})
 				require("mini.move").setup({
@@ -341,9 +350,11 @@ require("lazy").setup({
 			config = function()
 				require("mason").setup()
 				require("mason-tool-installer").setup({
-					ensure_installed = { "lua_ls", "clangd", "stylua", "prettier", "prettierd" },
+					ensure_installed = { "lua_ls", "clangd", "stylua", "prettier", "prettierd", "vtsls" },
 				})
 				require("mason-lspconfig").setup()
+				local lspconfig = require("lspconfig")
+				lspconfig.vtsls.setup({}) -- Manually load vtsls (javascript typescript)
 			end,
 		},
 		{ -- Configure format_on_save and formatters
@@ -382,7 +393,24 @@ require("lazy").setup({
 				})
 			end,
 		},
-		{ "nvim-treesitter/nvim-treesitter" },
+		{
+			"nvim-treesitter/nvim-treesitter",
+			opts = {
+				ensure_installed = {
+					"c",
+					"cpp",
+					"lua",
+					"rust",
+					"html",
+					"javascript",
+				},
+				indent = { enable = true, disable = { "html" } },
+				highlight = { enable = true },
+			},
+			config = function(_, opts)
+				require("nvim-treesitter.configs").setup(opts)
+			end,
+		},
 		{
 			"folke/which-key.nvim",
 			config = function()
@@ -493,10 +521,11 @@ require("lazy").setup({
 				vim.keymap.set("n", "<leader>ff",       require("telescope.builtin").find_files,  { desc = "Find Files"       })
 				vim.keymap.set("n", "<leader>fb",       require("telescope.builtin").buffers,     { desc = "Find Buffers"     })
 				vim.keymap.set("n", "<leader>fj",       require("telescope.builtin").git_files,   { desc = "Find Git Files"   })
-				vim.keymap.set("n", "<leader>fk",       require("telescope.builtin").git_status,  { desc = "Find Git Status"  })
+				vim.keymap.set("n", "<leader>fs",       require("telescope.builtin").git_status,  { desc = "Find Git Status"  })
 				vim.keymap.set("n", "<leader>fd",       require("telescope.builtin").live_grep,   { desc = "Find in Current"  })
 				vim.keymap.set("n", "<leader>fh",       require("telescope.builtin").help_tags,   { desc = "Find Help"        })
 				vim.keymap.set("n", "<leader>fc",       require("telescope.builtin").git_commits, { desc = "Find Git Commits" })
+				vim.keymap.set("n", "<leader>fk",       require("telescope.builtin").keymaps,     { desc = "Find Keymaps"     })
 				vim.keymap.set("n", "<leader><leader>", require("telescope.builtin").buffers,     { desc = "[FIND BUFFERS]"   })
 				-- stylua: ignore end
 			end,
@@ -591,7 +620,15 @@ require("lazy").setup({
 			"benomahony/oil-git.nvim",
 			dependencies = { "stevearc/oil.nvim" },
 		},
+		{
+			"windwp/nvim-ts-autotag",
+			event = { "BufReadPre", "BufNewFile" },
+			config = function()
+				require("nvim-ts-autotag").setup()
+			end,
+		},
 	},
+	-- END OF PLUGINS
 	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
