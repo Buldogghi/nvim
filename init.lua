@@ -3,6 +3,9 @@
 
 -- {{{ Settings
 
+vim.opt.cmdheight = 0 -- Paired with Noice.nvim
+-- so the bottom bar doesn't flash on boot
+
 vim.opt.number = true
 vim.opt.cursorline = true
 vim.opt.relativenumber = true
@@ -21,11 +24,12 @@ vim.opt.splitbelow = true -- Open splits below instead of above
 vim.opt.list = true -- Enable custom whitespace characters
 -- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.opt.listchars = { tab = "▎ ", trail = "·", nbsp = "␣" }
-vim.opt.scrolloff = 3 -- Number of lines above/below the cursor everytime
+vim.opt.scrolloff = 3 -- Number of lines above/below the cursor every time
 vim.schedule(function() -- Sync clipboard between OS and Neovim.
 	vim.opt.clipboard = "unnamedplus"
 end)
 vim.opt.foldmethod = "marker" -- Enables folding
+vim.o.confirm = true
 
 -- Aliases
 vim.api.nvim_command("cabbrev Q qa!")
@@ -90,11 +94,11 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move focus to the right split" 
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move focus to the lower split" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper split" })
 
--- paste the last yanked text not deleted text (you can still use Ctrl + Shift + V to paste)
+-- Paste the last yanked text not deleted text (you can still use Ctrl + Shift + V to paste)
 -- vim.keymap.set({ "n", "v" }, "p", '"0p')
 -- vim.keymap.set({ "n", "v" }, "P", '"0P')
 
--- Don't deselect on copy (if Y is pressed) or indent/deindent
+-- Don't deselect on copy (if Y is pressed) or indent/unindent
 vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
@@ -157,7 +161,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
--- Lsp keybinds (from :help lsp)
+-- LSP keybinds (from :help LSP)
 vim.api.nvim_create_autocmd("LspAttach", {
 
 	-- stylua: ignore
@@ -223,6 +227,12 @@ require("lazy").setup({
 			"rose-pine/neovim",
 			name = "rose-pine",
 			config = function()
+				require("rose-pine").setup({
+					variant = "moon",
+					styles = {
+						transparency = true,
+					},
+				})
 				vim.cmd("colorscheme rose-pine")
 			end,
 		},
@@ -232,11 +242,61 @@ require("lazy").setup({
 				require("mini.icons").setup()
 				require("mini.git").setup()
 				require("mini.diff").setup()
-				require("mini.statusline").setup()
+				require("mini.statusline").setup({
+					content = {
+						active = function()
+							local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+							-- local git = MiniStatusline.section_git({ trunc_width = 40 })
+							-- local diff = MiniStatusline.section_diff({ trunc_width = 75 })
+							-- local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+							-- local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+							local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+							-- local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+							local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 1000 })
+							-- local location = MiniStatusline.section_location({ trunc_width = 75 })
+							local location = (function()
+								local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+								local tot_row = vim.api.nvim_buf_line_count(0)
+								local tot_col = #vim.api.nvim_get_current_line() - 1
+								-- local winwidth = vim.api.nvim_win_get_width(0)
+								return string.format(
+									"%d/%d %d/%d %d%%%%",
+									row,
+									tot_row,
+									col,
+									tot_col,
+									row / tot_row * 100
+								)
+								-- I don't know why %%%% = '%' but it works
+							end)()
+							local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+
+							local macro = (function()
+								local rec = vim.fn.reg_recording()
+								if rec ~= "" then
+									return "recording @" .. rec
+								else
+									return ""
+								end
+							end)()
+
+							return MiniStatusline.combine_groups({
+								{ hl = mode_hl, strings = { mode } },
+								-- { hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics } },
+								-- "%<", -- Mark general truncate point
+								{ hl = "MiniStatuslineFilename", strings = { filename } },
+								"%=", -- End left alignment
+								{ hl = "MiniStatuslineFilename", strings = { macro } },
+								{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+								{ hl = mode_hl, strings = { search, location } },
+							})
+						end,
+					},
+				})
 				require("mini.pairs").setup({
 					-- stylua: ignore
 					mappings = {
-						-- For more info about lua patterns:
+						-- For more info about Lua patterns:
 						-- https://gitspartv.github.io/lua-patterns/
 
 						-- [%c ][%c ] Means that for the quotes to be doubled the character
@@ -281,7 +341,11 @@ require("lazy").setup({
 					},
 				})
 				require("mini.comment").setup()
-				require("mini.notify").setup()
+				require("mini.notify").setup({
+					lsp_progress = {
+						enable = false, -- Handled by noice.nvim
+					},
+				})
 			end,
 		},
 		{
@@ -349,12 +413,52 @@ require("lazy").setup({
 			},
 			config = function()
 				require("mason").setup()
+				require("mason-lspconfig").setup({})
+
+				local function checkfor(s)
+					local f = io.popen("which " .. s, "r")
+					if not f then
+						return nil
+					end
+					local path = f:read("*a"):gsub("\n*$", "")
+					local suc = not (path == "")
+					f:close() -- f:close() success/status code isn't accurate
+					return suc, path
+				end
+
+				-- stylua: ignore start
+				-- Checks if the LSPs are already installed on the system
+				-- (and use them if yes)
+				local tocheck = { "lua-language-server", "clangd", "harper-ls", "vtsls",   "stylua", "prettier" }
+				local lspname = { "lua_ls",              "",       "harper_ls", "",        "",       ""         }
+				local cmdargs = { "",                    "",       "--stdio",   "--stdio", "--lsp",  ""         }
+				-- stylua: ignore end
+				local to_install = {}
+				for i, item in ipairs(tocheck) do
+					local lspitem = item
+					if not (lspname[i] == "") then
+						lspitem = lspname[i]
+					end
+					local suc, path = checkfor(item)
+					if suc then
+						if cmdargs[i] == "" then
+							vim.lsp.config(lspitem, {
+								cmd = { path },
+							})
+						else
+							vim.lsp.config(lspitem, {
+								cmd = { path, cmdargs[i] },
+							})
+						end
+						vim.lsp.enable(lspitem)
+					else
+						table.insert(to_install, lspitem)
+					end
+				end
+
 				require("mason-tool-installer").setup({
-					ensure_installed = { "lua_ls", "clangd", "stylua", "prettier", "prettierd", "vtsls" },
+					ensure_installed = to_install,
 				})
-				require("mason-lspconfig").setup()
-				local lspconfig = require("lspconfig")
-				lspconfig.vtsls.setup({}) -- Manually load vtsls (javascript typescript)
 			end,
 		},
 		{ -- Configure format_on_save and formatters
@@ -377,7 +481,11 @@ require("lazy").setup({
 					end,
 					formatters_by_ft = { -- :help conform.format
 						lua = { "stylua" },
-						javascript = { "prettierd", "prettier", stop_after_first = true },
+						-- javascript = { "prettierd", "prettier", stop_after_first = true },
+						javascript = { "prettier" },
+						html = { "prettier" },
+						css = { "prettier" },
+						markdown = { "prettier" },
 					},
 				})
 			end,
@@ -432,7 +540,7 @@ require("lazy").setup({
 		},
 		{
 			"folke/lazydev.nvim",
-			ft = "lua", -- only load on lua files
+			ft = "lua", -- only load on Lua files
 			opts = {
 				library = {
 					-- See the configuration section for more details
@@ -495,15 +603,12 @@ require("lazy").setup({
 						lazydev = {
 							name = "LazyDev",
 							module = "lazydev.integrations.blink",
-							-- make lazydev completions top priority (see `:h blink.cmp`)
+							-- Make lazydev completions top priority (see `:h blink.cmp`)
 							score_offset = 100,
 						},
 					},
 				},
 				fuzzy = { implementation = "prefer_rust_with_warning" },
-				sources = {
-					default = { "lsp", "path", "buffer" },
-				},
 			},
 			opts_extend = { "sources.default" },
 		},
@@ -522,10 +627,11 @@ require("lazy").setup({
 				vim.keymap.set("n", "<leader>fb",       require("telescope.builtin").buffers,     { desc = "Find Buffers"     })
 				vim.keymap.set("n", "<leader>fj",       require("telescope.builtin").git_files,   { desc = "Find Git Files"   })
 				vim.keymap.set("n", "<leader>fs",       require("telescope.builtin").git_status,  { desc = "Find Git Status"  })
-				vim.keymap.set("n", "<leader>fd",       require("telescope.builtin").live_grep,   { desc = "Find in Current"  })
+				vim.keymap.set("n", "<leader>f ",       require("telescope.builtin").live_grep,   { desc = "Find in Current"  })
 				vim.keymap.set("n", "<leader>fh",       require("telescope.builtin").help_tags,   { desc = "Find Help"        })
 				vim.keymap.set("n", "<leader>fc",       require("telescope.builtin").git_commits, { desc = "Find Git Commits" })
 				vim.keymap.set("n", "<leader>fk",       require("telescope.builtin").keymaps,     { desc = "Find Keymaps"     })
+				vim.keymap.set("n", "<leader>fd",       require("telescope.builtin").diagnostics, { desc = "Find diagnostics" })
 				vim.keymap.set("n", "<leader><leader>", require("telescope.builtin").buffers,     { desc = "[FIND BUFFERS]"   })
 				-- stylua: ignore end
 			end,
@@ -533,7 +639,7 @@ require("lazy").setup({
 		{
 			"rachartier/tiny-inline-diagnostic.nvim",
 			event = "VeryLazy", -- Or `LspAttach`
-			priority = 1000, -- needs to be loaded in first
+			priority = 1000, -- Needs to be loaded in first
 			config = function()
 				require("tiny-inline-diagnostic").setup()
 				vim.diagnostic.config({ virtual_text = false }) -- Only if needed in your configuration, if you already have native LSP diagnostics
@@ -552,17 +658,6 @@ require("lazy").setup({
 				vim.o.foldenable = true
 				vim.keymap.set("n", "zR", require("ufo").openAllFolds)
 				vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
-				local capabilities = vim.lsp.protocol.make_client_capabilities()
-				capabilities.textDocument.foldingRange = {
-					dynamicRegistration = false,
-					lineFoldingOnly = true,
-				}
-				local language_servers = vim.lsp.get_clients()
-				for _, ls in ipairs(language_servers) do
-					require("lspconfig")[ls].setup({
-						capabilities = capabilities,
-					})
-				end
 				require("ufo").setup()
 			end,
 		},
@@ -627,9 +722,34 @@ require("lazy").setup({
 				require("nvim-ts-autotag").setup()
 			end,
 		},
+		{
+			"folke/noice.nvim",
+			event = "VeryLazy",
+			opts = {
+				cmdline = { enabled = true },
+				messages = { enabled = true },
+				popupmenu = { enabled = false },
+				notify = { enabled = false },
+				lsp = {
+					progress = {
+						view = "mini",
+					},
+					override = {
+						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+						["vim.lsp.util.stylize_markdown"] = true,
+						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+					},
+					hover = { enabled = false },
+				},
+			},
+
+			dependencies = {
+				"MunifTanjim/nui.nvim",
+			},
+		},
 	},
 	-- END OF PLUGINS
-	lockfile = "/dev/null", -- don't generate a lazy-lock.json file
+	lockfile = "/dev/null", -- Don't generate a lazy-lock.json file
 	checker = { enabled = false },
 })
 
