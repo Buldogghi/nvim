@@ -429,9 +429,9 @@ require("lazy").setup({
 				-- stylua: ignore start
 				-- Checks if the LSPs are already installed on the system
 				-- (and use them if yes)
-				local tocheck = { "lua-language-server", "clangd", "harper-ls", "vtsls",   "stylua", "prettier" }
-				local lspname = { "lua_ls",              "",       "harper_ls", "",        "",       ""         }
-				local cmdargs = { "",                    "",       "--stdio",   "--stdio", "--lsp",  ""         }
+				local tocheck = { "lua-language-server", "clangd", "harper-ls", "vtsls",   "stylua", "prettier", "rust-analyzer" }
+				local lspname = { "lua_ls",              "",       "harper_ls", "",        "",       "",         "rust_analyzer" }
+				local cmdargs = { "",                    "",       "--stdio",   "--stdio", "--lsp",  "",         ""              }
 				-- stylua: ignore end
 				local to_install = {}
 				for i, item in ipairs(tocheck) do
