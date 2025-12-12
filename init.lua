@@ -33,6 +33,7 @@ vim.o.confirm = true
 
 -- Aliases
 vim.api.nvim_command("cabbrev Q qa!")
+vim.opt.linebreak = true
 
 vim.diagnostic.config({
 	signs = false, -- turn off diagnostic signs
