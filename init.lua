@@ -109,11 +109,6 @@ vim.keymap.set({"n", "v", "i"}, "<C-f>", "<Right>")
 vim.keymap.set({"n", "v", "i"}, "<C-b>", "<Left>")
 vim.keymap.set({"n", "v", "i"}, "<C-n>", "<Down>")
 vim.keymap.set({"n", "v", "i"}, "<C-p>", "<Up>")
--- And vim in insert/visual
-vim.keymap.set({"v", "i"}, "<C-l>", "<Right>")
-vim.keymap.set({"v", "i"}, "<C-h>", "<Left>")
-vim.keymap.set({"v", "i"}, "<C-j>", "<Down>")
-vim.keymap.set({"v", "i"}, "<C-k>", "<Up>")
 
 -- K for useful info
 vim.keymap.set("n", ";", vim.diagnostic.open_float)
@@ -235,6 +230,9 @@ require("lazy").setup({
 					},
 				})
 				vim.cmd("colorscheme rose-pine")
+				vim.api.nvim_set_hl(0, "Visual", {
+					bg = "#44415a",
+				})
 			end,
 		},
 		{
