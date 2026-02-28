@@ -480,11 +480,15 @@ require("lazy").setup({
 					end,
 					formatters_by_ft = { -- :help conform.format
 						lua = { "stylua" },
-						-- javascript = { "prettierd", "prettier", stop_after_first = true },
 						javascript = { "prettier" },
 						html = { "prettier" },
 						css = { "prettier" },
 						markdown = { "prettier" },
+					},
+					formatters = {
+						prettier = {
+							prepend_args = { "--use-tabs" },
+						},
 					},
 				})
 			end,
@@ -502,6 +506,7 @@ require("lazy").setup({
 		},
 		{
 			"nvim-treesitter/nvim-treesitter",
+			event = { "BufReadPost", "BufNewFile" },
 			opts = {
 				ensure_installed = {
 					"c",
@@ -581,6 +586,7 @@ require("lazy").setup({
 		{
 			"saghen/blink.cmp",
 			dependencies = { "rafamadriz/friendly-snippets" },
+			event = "InsertEnter",
 			version = "1.*",
 			---@module 'blink.cmp'
 			---@type blink.cmp.Config
@@ -647,6 +653,7 @@ require("lazy").setup({
 		{ "famiu/bufdelete.nvim" }, -- Manage buffers
 		{
 			"kevinhwang91/nvim-ufo",
+			event = "BufReadPost",
 			dependencies = {
 				"kevinhwang91/promise-async",
 			},
