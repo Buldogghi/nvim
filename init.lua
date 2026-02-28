@@ -1,6 +1,3 @@
--- Nvim single-file config
--- By Buldogghi (buldogghi@proton.me)
-
 -- {{{ Settings
 
 vim.opt.cmdheight = 0 -- Paired with Noice.nvim
