@@ -1,6 +1,6 @@
 -- {{{ Settings
 
-vim.opt.cmdheight = 0 -- Paired with Noice.nvim
+vim.opt.cmdheight = 0 -- Works well in nvim-git
 -- so the bottom bar doesn't flash on boot
 
 vim.opt.number = true
@@ -339,24 +339,24 @@ require("lazy").setup({
 				require("mini.comment").setup()
 				require("mini.notify").setup({
 					lsp_progress = {
-						enable = false, -- Handled by noice.nvim
+						enable = true, -- Handled by noice.nvim
 					},
 				})
 			end,
 		},
-		{
-			"karb94/neoscroll.nvim",
-			opts = {
-				duration_multiplier = 0.3,
-				mappings = {
-					"<C-d>",
-					"<C-u>",
-					"zz",
-					"zt",
-					"zb",
-				},
-			},
-		},
+		-- {
+		-- 	"karb94/neoscroll.nvim",
+		-- 	opts = {
+		-- 		duration_multiplier = 0.3,
+		-- 		mappings = {
+		-- 			"<C-d>",
+		-- 			"<C-u>",
+		-- 			"zz",
+		-- 			"zt",
+		-- 			"zb",
+		-- 		},
+		-- 	},
+		-- },
 		{
 			"sindrets/diffview.nvim",
 			config = function()
@@ -503,21 +503,31 @@ require("lazy").setup({
 		},
 		{
 			"nvim-treesitter/nvim-treesitter",
-			event = { "BufReadPost", "BufNewFile" },
-			opts = {
-				ensure_installed = {
-					"c",
-					"cpp",
-					"lua",
-					"rust",
-					"html",
-					"javascript",
-				},
-				indent = { enable = true, disable = { "html" } },
-				highlight = { enable = true },
-			},
-			config = function(_, opts)
-				require("nvim-treesitter.configs").setup(opts)
+			lazy = false,
+			branch = "main",
+			build = ":TSUpdate",
+			config = function()
+				require("nvim-treesitter").install({ "c", "cpp", "lua", "rust", "html", "javascript" })
+
+				vim.api.nvim_create_autocmd("FileType", {
+					group = vim.api.nvim_create_augroup("nvim-treesitter-setup", { clear = true }),
+					callback = function(args)
+						local buf = args.buf
+						local filetype = args.match
+
+						local lang = vim.treesitter.language.get_lang(filetype) or filetype
+
+						-- Check if a parser exists and start it. pcall prevents errors for filetypes without parsers.
+						local ok = pcall(vim.treesitter.start, buf, lang)
+						if not ok then
+							return
+						end
+
+						if filetype ~= "html" then
+							vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+						end
+					end,
+				})
 			end,
 		},
 		{
@@ -725,31 +735,31 @@ require("lazy").setup({
 				require("nvim-ts-autotag").setup()
 			end,
 		},
-		{
-			"folke/noice.nvim",
-			event = "VeryLazy",
-			opts = {
-				cmdline = { enabled = true },
-				messages = { enabled = true },
-				popupmenu = { enabled = false },
-				notify = { enabled = false },
-				lsp = {
-					progress = {
-						view = "mini",
-					},
-					override = {
-						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-						["vim.lsp.util.stylize_markdown"] = true,
-						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
-					},
-					hover = { enabled = false },
-				},
-			},
-
-			dependencies = {
-				"MunifTanjim/nui.nvim",
-			},
-		},
+		--		{
+		--			"folke/noice.nvim",
+		--			event = "VeryLazy",
+		--			opts = {
+		--				cmdline = { enabled = true },
+		--				messages = { enabled = true },
+		--				popupmenu = { enabled = false },
+		--				notify = { enabled = false },
+		--				lsp = {
+		--					progress = {
+		--						view = "mini",
+		--					},
+		--					override = {
+		--						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+		--						["vim.lsp.util.stylize_markdown"] = true,
+		--						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+		--					},
+		--					hover = { enabled = false },
+		--				},
+		--			},
+		--
+		--			dependencies = {
+		--				"MunifTanjim/nui.nvim",
+		--			},
+		--		},
 	},
 	-- END OF PLUGINS
 	lockfile = "/dev/null", -- Don't generate a lazy-lock.json file
