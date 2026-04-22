@@ -1,6 +1,6 @@
 -- {{{ Settings
 
-vim.opt.cmdheight = 0 -- Works well in nvim-git
+vim.opt.cmdheight = 0 -- Works well in v0.12
 -- so the bottom bar doesn't flash on boot
 
 vim.opt.number = true
@@ -21,22 +21,24 @@ vim.opt.splitbelow = true -- Open splits below instead of above
 vim.opt.list = true -- Enable custom whitespace characters
 -- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.opt.listchars = { tab = "▎ ", trail = "·", nbsp = "␣" }
-vim.opt.scrolloff = 3 -- Number of lines above/below the cursor every time
+vim.opt.scrolloff = 2 -- Number of lines above/below the cursor every time
+vim.opt.sj = -50 -- Emacs like scrolljump
 vim.schedule(function() -- Sync clipboard between OS and Neovim.
 	vim.opt.clipboard = "unnamedplus"
 end)
 vim.opt.foldmethod = "marker" -- Enables folding
-vim.o.confirm = true
+-- vim.o.confirm = true
 
 -- Aliases
-vim.api.nvim_command("cabbrev Q qa!")
+-- vim.api.nvim_command("cabbrev Q qa!")
+vim.api.nvim_create_user_command("Q", "qa!", {})
 vim.opt.linebreak = true
 
 vim.diagnostic.config({
 	signs = false, -- turn off diagnostic signs
 })
 
---- }}}
+-- }}}
 
 -- {{{ Keybinds
 
@@ -101,11 +103,13 @@ vim.keymap.set("v", "Y", "ygv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
--- Emacs keymaps because why not
+-- Emacs-like keymaps
 vim.keymap.set({"n", "v", "i"}, "<C-f>", "<Right>")
 vim.keymap.set({"n", "v", "i"}, "<C-b>", "<Left>")
 vim.keymap.set({"n", "v", "i"}, "<C-n>", "<Down>")
 vim.keymap.set({"n", "v", "i"}, "<C-p>", "<Up>")
+vim.keymap.set("i", "<C-e>", "<C-o>$")
+vim.keymap.set("i", "<C-a>", "<C-o>^")
 
 -- K for useful info
 vim.keymap.set("n", ";", vim.diagnostic.open_float)
@@ -175,23 +179,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
--- Bootstrap lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-	if vim.v.shell_error ~= 0 then
-		vim.api.nvim_echo({
-			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
-			{ "\nPress any key to exit..." },
-		}, true, {})
-		vim.fn.getchar()
-		os.exit(1)
-	end
-end
-vim.opt.rtp:prepend(lazypath)
-
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "oil",
 	callback = function()
@@ -212,6 +199,23 @@ vim.api.nvim_create_autocmd("FileType", {
 -- }}}
 
 -- {{{ Plugins
+
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	if vim.v.shell_error ~= 0 then
+		vim.api.nvim_echo({
+			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+			{ out, "WarningMsg" },
+			{ "\nPress any key to exit..." },
+		}, true, {})
+		vim.fn.getchar()
+		os.exit(1)
+	end
+end
+vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	spec = {
@@ -494,10 +498,11 @@ require("lazy").setup({
 			"brenoprata10/nvim-highlight-colors",
 			config = function()
 				require("nvim-highlight-colors").setup({
-					render = "virtual",
-					virtual_symbol_prefix = "[",
-					virtual_symbol_suffix = "]",
-					virtual_symbol_position = "eow", -- Stands for end of word
+					-- render = "virtual",
+					render = "background",
+					-- virtual_symbol_prefix = "[",
+					-- virtual_symbol_suffix = "]",
+					-- virtual_symbol_position = "eow", -- Stands for end of word
 				})
 			end,
 		},
