@@ -1,3 +1,3 @@
-# nvim
+# My Neovim Config
 
-The neovim config I daily drive, it's a single init.lua file.
+The Neovim config I personally daily drive.
