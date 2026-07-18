@@ -182,7 +182,7 @@ local servers = {
 require("mason").setup()
 
 local function checkfor(s)
-	local f = io.popen("which " .. tostring(s), "r")
+	local f = io.popen("which " .. tostring(s) .. " 2>/dev/null", "r")
 	if not f then
 		return nil
 	end
