@@ -83,12 +83,12 @@ require("mini.pairs").setup({
 		-- before the cursor needs to be an escape character (%c = "\t\n\r")
 		-- or a space and the next/previous character needs to also be that.
 
-		["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]%s" }, -- LEFT: not backslash
-		["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]%s" }, -- RIGHT: whitespace
+		-- ["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]%s" }, -- LEFT: not backslash
+		-- ["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]%s" }, -- RIGHT: whitespace
 		["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]%s" },
 
-		[")"] = { action = "close", pair = "()" },
-		["]"] = { action = "close", pair = "[]" },
+		-- [")"] = { action = "close", pair = "()" },
+		-- ["]"] = { action = "close", pair = "[]" },
 		["}"] = { action = "close", pair = "{}" },
 
 		-- To open the brackets in a nice way when pressing enter
@@ -98,6 +98,10 @@ require("mini.pairs").setup({
 		-- ['`'] = { action = "open", pair = "``", neigh_pattern = "$^$^", register = { cr = true } },
 
 		-- Disable them
+		['('] = false,
+		['['] = false,
+		[')'] = false,
+		[']'] = false,
 		['"'] = false,
 		["'"] = false,
 		['`'] = false,
