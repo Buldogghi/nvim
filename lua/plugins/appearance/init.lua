@@ -19,6 +19,7 @@ require("rose-pine").setup({
 })
 
 vim.cmd("colorscheme rose-pine")
+vim.opt.colorcolumn = "80"
 
 require("hlchunk").setup({
 	chunk = {

@@ -214,6 +214,9 @@ for _, lsp_item in ipairs(to_check) do
 	end
 end
 
+-- Disable harper_ls by default
+vim.lsp.enable("harper_ls", false)
+
 -- require("mason-lspconfig").setup({ ensure_installed = to_install })
 -- require("mason-lspconfig").setup({}) -- Automatically enable them
 
